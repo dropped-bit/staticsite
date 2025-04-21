@@ -6,5 +6,5 @@ def main():
     print(repr(my_object))
 
 
-                if __name__ == "__main__":
-                    main()
+if __name__ == "__main__":
+    main()

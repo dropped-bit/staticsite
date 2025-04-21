@@ -17,7 +17,7 @@ class HTMLNode:
         return props_html
 
     def __repr__(self):
-        return f"HTMLNode('{self.tag}', {self.value}, children: {self.children}, {self.props})"
+        return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
 
 
 class LeafNode(HTMLNode):
@@ -29,7 +29,7 @@ class LeafNode(HTMLNode):
             raise ValueError("invalid HTML: no value")
         if self.tag is None:
             return self.value
-        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+        return f"<{self.tag}{self.props_to_html()}>{self.value}{f'</{self.tag}>' if self.tag is not "img" else ''}"
 
     def __repr__(self):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
@@ -63,8 +63,9 @@ class ParentNode(HTMLNode):
             raise ValueError("invalid HTML: no tag")
         if self.children is None:
             raise ValueError("invalid HTML: no nested html available")
-
+        # if self.props is None:
+        #     return None
         children_concat = ""
         for node in self.children:
             children_concat += node.to_html()
-        return f"<{self.tag}<{self.props_to_html()}>{children_concat}</{self.tag}>"
+        return f"<{self.tag}{f' {self.props}' if self.props else ''}>{children_concat}</{self.tag}>"
