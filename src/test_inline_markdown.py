@@ -1,6 +1,8 @@
 import unittest
 from textnode import TextNode, TextType
 from inline_markdown import (
+    split_nodes_links,
+    split_nodes_image,
     split_nodes_delimiter,
     extract_markdown_links,
     extract_markdown_images,
@@ -73,7 +75,7 @@ class TestCode(unittest.TestCase):
         )
         self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
-    def test_extract_markdown_text(self):
+    def test_extract_markdown_links(self):
         matches = extract_markdown_links(
             "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
         )
@@ -83,4 +85,83 @@ class TestCode(unittest.TestCase):
                 ("to youtube", "https://www.youtube.com/@bootdotdev"),
             ],
             matches,
+        )
+
+    def test_split_images(self):
+        node_no_image = TextNode(
+            "This is text without an image",
+            TextType.TEXT,
+        )
+        node_image = TextNode(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png) and another ![second image](https://i.imgur.com/3elNhQu.png)",
+            TextType.TEXT,
+        )
+
+        old_nodes = []
+        old_nodes.append(node_no_image)
+        old_nodes.append(node_image)
+
+        nodes_results = split_nodes_image(old_nodes)
+
+        self.assertListEqual(
+            [
+                TextNode("This is text without an image", TextType.TEXT),
+                TextNode("This is text with an ", TextType.TEXT),
+                TextNode("image", TextType.IMAGE, "https://i.imgur.com/zjjcJKZ.png"),
+                TextNode(" and another ", TextType.TEXT),
+                TextNode(
+                    "second image",
+                    TextType.IMAGE,
+                    "https://i.imgur.com/3elNhQu.png",
+                ),
+            ],
+            nodes_results,
+        )
+
+    def test_split_links(self):
+        node_no_link = TextNode(
+            "This is text without a link",
+            TextType.TEXT,
+        )
+        node_link = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)",
+            TextType.TEXT,
+        )
+
+        old_nodes = []
+        old_nodes.append(node_no_link)
+        old_nodes.append(node_link)
+
+        nodes_results = split_nodes_links(old_nodes)
+
+        self.assertListEqual(
+            [
+                TextNode("This is text without a link", TextType.TEXT),
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+                TextNode(" and ", TextType.TEXT),
+                TextNode(
+                    "to youtube", TextType.LINK, "https://www.youtube.com/@bootdotdev"
+                ),
+            ],
+            nodes_results,
+        )
+
+    def test_split_one_link(self):
+        node_link = TextNode(
+            "This is text with a link [to boot dev](https://www.boot.dev)",
+            TextType.TEXT,
+        )
+
+        old_nodes = []
+        old_nodes.append(node_link)
+
+        nodes_results = split_nodes_links(old_nodes)
+
+        self.assertListEqual(
+            [
+                TextNode("This is text with a link ", TextType.TEXT),
+                TextNode("to boot dev", TextType.LINK, "https://www.boot.dev"),
+            ],
+            nodes_results,
         )

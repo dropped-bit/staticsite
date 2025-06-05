@@ -35,7 +35,6 @@ class LeafNode(HTMLNode):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
 
 
-#
 # Create another child class of HTMLNode called ParentNode. Its constructor should differ from HTMLNode in that:
 # The tag and children arguments are not optional
 # It doesn't take a value argument
